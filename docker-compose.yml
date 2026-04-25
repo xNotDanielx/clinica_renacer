@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:15
+    container_name: clinica_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: clinica
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    container_name: clinica_backend
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: clinica_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
