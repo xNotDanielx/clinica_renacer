@@ -1,7 +1,22 @@
 from fastapi import FastAPI
-from app.db.database import engine
+from app.db.database import Base, engine
+import app.models
+from app.routes import (
+    citas_router,
+    codigos_promocionales_router,
+    pacientes_router,
+    procedimientos_router,
+)
 
 app = FastAPI()
+
+# Registra metadatos de todos los modelos y crea tablas si no existen.
+Base.metadata.create_all(bind=engine)
+
+app.include_router(pacientes_router)
+app.include_router(procedimientos_router)
+app.include_router(citas_router)
+app.include_router(codigos_promocionales_router)
 
 @app.get("/")
 def root():
