@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm ci --no-audit --no-fund && npm run dev"]
