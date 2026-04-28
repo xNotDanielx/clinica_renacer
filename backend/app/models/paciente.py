@@ -6,7 +6,36 @@ from app.db.database import Base
 
 class Paciente(Base):
     __tablename__ = "pacientes"
-    __table_args__ = {"schema": "public"}
+    __table_args__ = (
+        CheckConstraint(
+            "sexo IN ('masculino', 'femenino')",
+            name="chk_paciente_sexo",
+        ),
+        CheckConstraint(
+            "tipo_identificacion IN ("
+            "'cedula_chilena', "
+            "'cedula_extranjero', "
+            "'pasaporte_chileno', "  
+            "'pasaporte_extranjero', "
+            "'documento_extranjero'"
+            ")",
+            name="chk_paciente_tipo_documento",
+        ),
+        CheckConstraint(
+            "genero IN ("
+            "'masculino', "
+            "'femenino', "
+            "'no_binario', "
+            "'transgenero', "
+            "'genero_fluido', "
+            "'prefiero_no_decir', "
+            "'otro'"
+            ")",
+            name="chk_paciente_genero",
+        ),
+        {"schema": "public"},
+    )
+    
 
     identificacion = Column(String(20), primary_key=True)
     tipo_identificacion = Column(String(100), nullable=False)
