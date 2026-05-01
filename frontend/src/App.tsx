@@ -1,26 +1,49 @@
 import { useMemo, useState } from "react";
 
 const procedures = [
-  { name: "Aumento de senos", price: 5500 },
-  { name: "Liposucción", price: 6800 },
-  { name: "Gluteoplastia", price: 7200 },
-  { name: "Transferencia de grasa", price: 7900 },
-  { name: "Abdominoplastia", price: 8400 },
-  { name: "Levantamiento de glúteos", price: 6900 },
-  { name: "Marcación abdominal", price: 5800 },
-  { name: "Mastopexia", price: 6100 },
+  {
+    name: "Lipopapada",
+    info: "Reduce el exceso de grasa bajo el mentón y define el perfil facial.",
+    image: "https://doctormonroy.com/wp-content/uploads/2020/01/rinoplastia-Bogota.jpg",
+  },
+  {
+    name: "Aumento Mamario Simple",
+    info: "Mejora el volumen y la armonía del busto con un resultado natural.",
+    image: "https://doctorfajardo.com/wp-content/uploads/2021/12/aumento-de-senos.jpg",
+  },
+  {
+    name: "Mastopexia Circunvertical",
+    info: "Eleva y remodela el busto con una técnica de cicatriz vertical.",
+    image: "https://objects-mx.cdn-topdoctors.com/article/22127/image/large/mastopexia-cirugia-para-levantar-rejuvenecer-senos-1747698085-1747698134.jpg",
+  },
+  {
+    name: "Mastopexia T Invertida",
+    info: "Lifting mamario indicado para mayor caída o exceso de piel.",
+    image: "https://cbcestetica.com/wp-content/uploads/2016/03/maxtopexia.jpg",
+  },
+  {
+    name: "Lipoescultura 360 con Transferencia Glútea",
+    info: "Moldea el contorno corporal y aporta volumen glúteo con grasa propia.",
+    image: "https://opcionmedica.es/wp-content/uploads/2019/03/liposuccion-360.jpg",
+  },
+  {
+    name: "Lipoabdominoplastia con Transferencia Glútea",
+    info: "Define abdomen y cintura, combinando retracción abdominal y proyección glútea.",
+    image: "https://jorgeafanador.com/wp-content/uploads/2018/11/Abdominoplastia-cirugia-estetica-plastica.jpg",
+  },
 ];
+
+const galleryPairs = Array.from({ length: 9 }).map((_, index) => ({
+  before: `Antes ${index + 1}`,
+  after: `Después ${index + 1}`,
+  beforeImage: `https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80&sig=${index + 1}`,
+  afterImage: `https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80&sig=${index + 20}`,
+}));
 
 export default function App() {
   const [selected, setSelected] = useState<string[]>([]);
   const [blockedProcedure, setBlockedProcedure] = useState<string | null>(null);
   const [showLimitMessage, setShowLimitMessage] = useState(false);
-
-  const totalApprox = useMemo(() => {
-    return procedures
-      .filter((p) => selected.includes(p.name))
-      .reduce((sum, p) => sum + p.price, 0);
-  }, [selected]);
 
   const toggleProcedure = (name: string) => {
     if (selected.includes(name)) {
@@ -28,7 +51,7 @@ export default function App() {
       return;
     }
 
-    if (selected.length >= 3) {
+    if (selected.length >= 2) {
       setBlockedProcedure(name);
       setShowLimitMessage(true);
 
@@ -44,60 +67,54 @@ export default function App() {
     setSelected((prev) => [...prev, name]);
   };
 
-  const usd = (value: number) =>
-    value.toLocaleString("en-US", { style: "currency", currency: "USD" });
-
   return (
     <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden">
       <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_30%),radial-gradient(circle_at_right,rgba(56,189,248,0.16),transparent_28%),linear-gradient(180deg,#050816_0%,#090b1a_100%)]" />
       <div className="fixed inset-0 -z-10 opacity-25 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:60px_60px]" />
 
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/20 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
-          <div className="w-[300px] shrink-0">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/35 backdrop-blur-2xl">
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div className="w-[320px] shrink-0 leading-tight">
             <p className="text-sm md:text-base font-semibold uppercase tracking-[0.35em] text-cyan-300 whitespace-nowrap">
-              Clínica estética
+              CLÍNICA ESTÉTICA
             </p>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white whitespace-nowrap">
-              Clínica Renacer
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white whitespace-nowrap">
+              Renacer
             </h1>
           </div>
 
-          <nav className="hidden md:flex flex-1 justify-center items-center gap-8 text-lg font-semibold">
-            <a className="nav-link px-6 py-3" href="#inicio">Inicio</a>
-            <a className="nav-link px-6 py-3" href="#procedimientos">Procedimientos</a>
-            <a className="nav-link px-6 py-3" href="#galeria">Galería</a>
-            <a className="nav-link px-6 py-3" href="#contacto">Contacto</a>
+          <nav className="hidden md:flex flex-1 justify-center items-center gap-10 text-base md:text-lg font-bold">
+            <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#inicio">INICIO</a>
+            <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#procedimientos">PROCEDIMIENTOS</a>
+            <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#galeria">ANTES Y DESPUÉS</a>
+            <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#contacto">CONTÁCTANOS</a>
           </nav>
 
-          <div className="hidden md:block w-[300px] shrink-0" />
+          <div className="hidden md:block w-[320px] shrink-0" />
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 pt-28">
         <section id="inicio" className="py-20 md:py-28 scroll-mt-28">
-          <div className="grid items-center gap-12 xl:grid-cols-[1.08fr_0.92fr]">
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
-                <span className="h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-200">
-                  Clínica de medicina estética
-                </span>
-              </div>
-
-              <h2 className="max-w-4xl text-6xl md:text-8xl font-black tracking-tight text-white">
+          <div className="grid items-start gap-6 lg:grid-cols-2">
+            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 md:p-10 backdrop-blur-xl">
+              <p className="section-kicker">Clínica estética</p>
+              <h2 className="mt-3 text-5xl md:text-7xl font-black tracking-tight text-white">
                 Clínica Renacer
               </h2>
-
-              <p className="mt-5 text-3xl md:text-4xl font-semibold text-cyan-200">
+              <p className="mt-4 text-2xl md:text-3xl font-semibold text-cyan-200">
                 Doctor Miguel Mendoza
               </p>
 
-              <p className="mt-8 max-w-2xl text-lg md:text-2xl leading-9 text-slate-300">
-                Un espacio especializado en procedimientos corporales, atención personalizada y una experiencia moderna.
+              <p className="mt-4 text-lg md:text-xl font-medium text-violet-200 italic">
+                “Belleza, confianza y acompañamiento en cada etapa del proceso.”
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-4">
+              <p className="mt-6 text-lg md:text-xl leading-8 text-slate-300 max-w-2xl">
+                Un espacio especializado en procedimientos corporales, atención personalizada y una experiencia moderna. El doctor Miguel Mendoza brinda valoración individual, enfoque estético y seguimiento cercano para cada paciente.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-4">
                 <a href="#contacto" className="btn-primary">
                   Agendar consulta
                 </a>
@@ -108,47 +125,32 @@ export default function App() {
             </div>
 
             <div className="relative">
-              <div className="absolute -inset-8 rounded-[2.5rem] bg-gradient-to-tr from-violet-600/20 via-cyan-500/15 to-transparent blur-2xl" />
+              <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-tr from-violet-600/20 via-cyan-500/15 to-transparent blur-2xl" />
               <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur-xl">
                 <div className="aspect-[4/5] w-full rounded-[2rem] bg-black flex items-center justify-center text-lg text-white/45">
-                  Espacio para la foto del doctor
+                  Foto del doctor
                 </div>
               </div>
             </div>
           </div>
-        </section>
 
-        <Separator />
-
-        <section className="py-20 md:py-28 scroll-mt-28">
-          <div className="grid gap-6 lg:grid-cols-3">
-            <article className="glass-card">
-              <p className="section-kicker">Información</p>
-              <h3 className="card-title">Sobre la clínica</h3>
-              <p className="card-text">
-                Clínica Renacer ofrece una experiencia estética elegante, segura y orientada a resultados naturales.
-              </p>
-            </article>
-
-            <article className="glass-card">
-              <p className="section-kicker">Atención</p>
-              <h3 className="card-title">Consulta personalizada</h3>
-              <p className="card-text">
-                Cada paciente recibe valoración para definir los procedimientos más adecuados según sus objetivos.
-              </p>
-            </article>
-
-            <article className="glass-card">
-              <p className="section-kicker">Resultados</p>
-              <h3 className="card-title">Enfoque premium</h3>
-              <p className="card-text">
-                Combinamos experiencia, estética y tecnología para lograr una atención moderna y profesional.
-              </p>
-            </article>
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Experiencia", "Atención profesional con enfoque en resultados naturales."],
+              ["Seguridad", "Valoración previa y acompañamiento médico en cada proceso."],
+              ["Acompañamiento", "Seguimiento cercano antes y después de la cirugía."],
+              ["Confianza", "Información clara para ayudarte a tomar la mejor decisión."],
+            ].map(([title, text]) => (
+              <article key={title} className="glass-card hover:scale-[1.03] hover:-translate-y-2 hover:bg-white/10">
+                <p className="section-kicker">{title}</p>
+                <h3 className="card-title">{title}</h3>
+                <p className="card-text">{text}</p>
+              </article>
+            ))}
           </div>
         </section>
 
-        <Separator glow="violet" />
+        <Separator />
 
         <section id="procedimientos" className="py-20 md:py-28 scroll-mt-28">
           <div className="mb-10">
@@ -157,11 +159,11 @@ export default function App() {
               Servicios corporales disponibles
             </h3>
             <p className="mt-4 text-lg md:text-xl text-slate-300 max-w-4xl">
-              Selecciona máximo 3 procedimientos. El valor mostrado es aproximado y luego se confirma en consulta con el doctor.
+              Selecciona máximo 2 cirugías por día o consulta. Luego se confirma la combinación más adecuada con el doctor.
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {procedures.map((item) => {
               const active = selected.includes(item.name);
               const blocked = blockedProcedure === item.name;
@@ -170,18 +172,28 @@ export default function App() {
                 <button
                   key={item.name}
                   onClick={() => toggleProcedure(item.name)}
-                  className={`procedure-card text-left transition-all duration-300 ${
-                    active ? "ring-2 ring-cyan-400 bg-white/15" : ""
-                  } ${blocked ? "ring-2 ring-red-500 bg-red-500/20 border-red-400/50" : ""}`}
+                  className={`procedure-hover-card p-8 ${active ? "ring-2 ring-cyan-400" : ""} ${blocked ? "ring-2 ring-red-500 bg-red-500/20 border-red-400/50" : ""}`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-lg font-semibold text-white">{item.name}</p>
-                      <p className="mt-2 text-base text-slate-300">Valor aproximado</p>
+                  <div className="procedure-hover-front h-full flex flex-col items-center text-center">
+                    <p className="text-2xl font-black text-white uppercase tracking-[0.06em] leading-tight text-center">
+                      {item.name}
+                    </p>
+
+                    <p className="mt-6 text-lg md:text-xl text-slate-200 leading-8 text-center md:text-justify max-w-[28rem]">
+                      {item.info}
+                    </p>
+                  </div>
+
+                  <div className="procedure-hover-image">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/35" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <p className="text-lg font-bold text-white">{item.name}</p>
                     </div>
-                    <span className="rounded-full bg-black/30 px-3 py-1 text-sm font-bold text-cyan-200">
-                      {usd(item.price)}
-                    </span>
                   </div>
                 </button>
               );
@@ -191,7 +203,7 @@ export default function App() {
           {showLimitMessage && (
             <div className="mt-8 rounded-3xl border border-red-500/40 bg-red-500/10 p-5 md:p-6 text-red-100 backdrop-blur-xl">
               <p className="text-lg md:text-xl font-semibold">
-                Máximo 3 procedimientos por consulta.
+                Máximo 2 cirugías por consulta.
               </p>
               <p className="mt-2 text-base md:text-lg text-red-100/80">
                 Para más información sobre combinaciones o procedimientos adicionales, consulta con el doctor.
@@ -202,13 +214,15 @@ export default function App() {
           <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6 md:p-8 backdrop-blur-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-cyan-300 font-semibold">
-                Precio aproximado
+                Procedimientos seleccionados
               </p>
-              <h4 className="mt-2 text-4xl md:text-5xl font-black">
-                {usd(totalApprox)}
+              <h4 className="mt-2 text-2xl md:text-3xl font-black leading-tight">
+                {selected.length > 0
+                  ? selected.join(" + ")
+                  : "Sin procedimientos seleccionados"}
               </h4>
               <p className="mt-3 text-base md:text-lg text-slate-300 max-w-2xl">
-                Este valor es referencial y puede cambiar después de la consulta médica.
+                Los valores se confirman directamente con el doctor durante la consulta, ya que pueden variar según promociones, valoración médica y características del procedimiento.
               </p>
             </div>
 
@@ -218,26 +232,35 @@ export default function App() {
           </div>
         </section>
 
-        <Separator />
+        <Separator glow="violet" />
 
         <section id="galeria" className="py-20 md:py-28 scroll-mt-28">
           <div className="mb-10">
             <p className="section-kicker">Galería</p>
-            <h3 className="text-4xl md:text-5xl font-black tracking-tight">Antes y después</h3>
+            <h3 className="text-4xl md:text-5xl font-black tracking-tight">
+              Antes y después
+            </h3>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="photo-card">
-              <div className="photo-placeholder">Espacio para imagen antes</div>
-            </div>
-
-            <div className="photo-card">
-              <div className="photo-placeholder">Espacio para imagen después</div>
-            </div>
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {galleryPairs.map((pair, idx) => (
+              <div key={idx} className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="gallery-card">
+                    <img src={pair.beforeImage} alt={pair.before} className="h-full w-full object-cover" />
+                    <div className="gallery-label">ANTES</div>
+                  </div>
+                  <div className="gallery-card">
+                    <img src={pair.afterImage} alt={pair.after} className="h-full w-full object-cover" />
+                    <div className="gallery-label">DESPUÉS</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
-        <Separator glow="violet" />
+        <Separator />
 
         <section id="contacto" className="py-20 md:py-28 scroll-mt-28">
           <div className="grid gap-6 lg:grid-cols-2 items-stretch">
