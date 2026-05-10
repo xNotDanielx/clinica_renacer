@@ -22,7 +22,7 @@ class Cita(Base):
     __table_args__ = (
         CheckConstraint("hora_fin > hora_inicio", name="chk_horas_validas"),
         CheckConstraint(
-            "estado IN ('pendiente', 'confirmada', 'cancelada', 'completada')",
+            "estado IN ('pendiente_aprobacion', 'aprobada', 'cancelada', 'completada')",
             name="chk_estado",
         ),
         UniqueConstraint("fecha_programada", "hora_inicio", name="unique_cita"),
@@ -51,6 +51,8 @@ class Cita(Base):
     monto_descuento = Column(Numeric(10, 2), nullable=True)
     monto_final = Column(Numeric(10, 2), nullable=True)
     nota = Column(Text, nullable=True)
+    notas_asesoria = Column(Text, nullable=True)
+    razon_rechazo = Column(Text, nullable=True)
     estado = Column(String(30), nullable=False)
     fecha_ultima_actualizacion = Column(
         DateTime,

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Float, String, text
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, String, text
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base

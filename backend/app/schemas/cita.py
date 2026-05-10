@@ -16,6 +16,8 @@ class CitaBase(BaseModel):
     monto_descuento: Decimal | None = None
     monto_final: Decimal | None = None
     nota: str | None = None
+    notas_asesoria: str | None = None
+    razon_rechazo: str | None = None
     estado: EstadoCita
 
 
@@ -30,7 +32,7 @@ class CitaCreateRequest(BaseModel):
     hora_inicio: time
     hora_fin: time
     nota: str | None = None
-    estado: EstadoCita = EstadoCita.PENDIENTE
+    estado: EstadoCita = EstadoCita.PENDIENTE_APROBACION
     procedimiento_ids: list[int]
     valor_consulta: Decimal
 
@@ -45,6 +47,8 @@ class CitaUpdate(BaseModel):
     monto_descuento: Decimal | None = None
     monto_final: Decimal | None = None
     nota: str | None = None
+    notas_asesoria: str | None = None
+    razon_rechazo: str | None = None
     estado: EstadoCita | None = None
 
 

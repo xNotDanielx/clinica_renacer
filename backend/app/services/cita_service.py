@@ -71,7 +71,7 @@ class CitaService:
         valor_consulta: Decimal,
         id_codigo_promocional: int | None = None,
         nota: str | None = None,
-        estado: EstadoCita = EstadoCita.PENDIENTE,
+        estado: EstadoCita = EstadoCita.PENDIENTE_APROBACION,
     ) -> Cita:
         with session.begin():
             paciente = session.get(Paciente, id_paciente)

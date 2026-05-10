@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class EstadoCita(str, Enum):
-    PENDIENTE = "pendiente"
-    CONFIRMADA = "confirmada"
+    PENDIENTE_APROBACION = "pendiente_aprobacion"
+    APROBADA = "aprobada"
     CANCELADA = "cancelada"
     COMPLETADA = "completada"
 
