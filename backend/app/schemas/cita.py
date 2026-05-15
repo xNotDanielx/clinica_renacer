@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from app.commons.enums import EstadoCita
+from app.common.enums import EstadoCita
 
 
 class CitaBase(BaseModel):

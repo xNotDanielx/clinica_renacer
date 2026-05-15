@@ -20,7 +20,7 @@ from app.schemas.codigo_promocional import (
     CodigoPromocionalOut,
     CodigoPromocionalUpdate,
 )
-from app.commons.enums import EstadoCita, TipoDescuento
+from app.common.enums import EstadoCita, TipoDescuento
 from app.schemas.paciente import PacienteCreate, PacienteOut, PacienteUpdate
 from app.schemas.procedimiento import (
     ProcedimientoCreate,

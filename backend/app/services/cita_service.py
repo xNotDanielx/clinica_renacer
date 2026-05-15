@@ -6,14 +6,14 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.commons.enums import EstadoCita
+from app.common.enums import EstadoCita
 from app.models.cita import Cita
 from app.models.cita_procedimiento import CitaProcedimiento
 from app.models.codigo_promocional import CodigoPromocional
 from app.models.paciente import Paciente
 from app.models.procedimiento import Procedimiento
 from app.services.codigo_promocional_service import CodigoPromocionalService
-from app.commons.exceptions import ConflictError, NotFoundError, ValidationError
+from app.common.exceptions import ConflictError, NotFoundError, ValidationError
 
 
 class CitaService:
