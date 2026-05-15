@@ -144,7 +144,10 @@ class CitaService:
             )
             .order_by(Cita.hora_inicio)
         )
-        return list(session.scalars(stmt).all())
+        citas = list(session.scalars(stmt).all())
+        if not citas:
+            raise NotFoundError("No hay citas registradas para esa fecha")
+        return citas
 
     @staticmethod
     def cambiar_estado_cita(session: Session, cita_id: int, nuevo_estado: EstadoCita) -> Cita:

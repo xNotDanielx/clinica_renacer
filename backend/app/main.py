@@ -1,8 +1,7 @@
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI
 
-from app.db.database import Base, engine
+from app.db.database import Base, engine, ensure_schema_compatibility
 import app.models
 from app.routes import (
     citas_router,
@@ -16,6 +15,7 @@ app = FastAPI()
 
 # Registra metadatos de todos los modelos y crea tablas si no existen.
 Base.metadata.create_all(bind=engine)
+ensure_schema_compatibility()
 
 app.include_router(pacientes_router)
 app.include_router(procedimientos_router)
@@ -38,9 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Serve uploads folder so `url_imagen` can point to /uploads/<file>
-# app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def root():
