@@ -1,37 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
-const procedures = [
-  {
-    name: "Lipopapada",
-    info: "Reduce el exceso de grasa bajo el mentón y define el perfil facial.",
-    image: "https://doctormonroy.com/wp-content/uploads/2020/01/rinoplastia-Bogota.jpg",
-  },
-  {
-    name: "Aumento Mamario Simple",
-    info: "Mejora el volumen y la armonía del busto con un resultado natural.",
-    image: "https://doctorfajardo.com/wp-content/uploads/2021/12/aumento-de-senos.jpg",
-  },
-  {
-    name: "Mastopexia Circunvertical",
-    info: "Eleva y remodela el busto con una técnica de cicatriz vertical.",
-    image: "https://objects-mx.cdn-topdoctors.com/article/22127/image/large/mastopexia-cirugia-para-levantar-rejuvenecer-senos-1747698085-1747698134.jpg",
-  },
-  {
-    name: "Mastopexia T Invertida",
-    info: "Lifting mamario indicado para mayor caída o exceso de piel.",
-    image: "https://cbcestetica.com/wp-content/uploads/2016/03/maxtopexia.jpg",
-  },
-  {
-    name: "Lipoescultura 360 con Transferencia Glútea",
-    info: "Moldea el contorno corporal y aporta volumen glúteo con grasa propia.",
-    image: "https://opcionmedica.es/wp-content/uploads/2019/03/liposuccion-360.jpg",
-  },
-  {
-    name: "Lipoabdominoplastia con Transferencia Glútea",
-    info: "Define abdomen y cintura, combinando retracción abdominal y proyección glútea.",
-    image: "https://jorgeafanador.com/wp-content/uploads/2018/11/Abdominoplastia-cirugia-estetica-plastica.jpg",
-  },
-];
+const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
+
+// Eliminado el diccionario estático `procedures` — ahora usamos exclusivamente la API
+// La UI renderizará los registros que devuelve GET /procedimientos/activos
 
 const galleryPairs = Array.from({ length: 9 }).map((_, index) => ({
   before: `Antes ${index + 1}`,
@@ -66,6 +38,33 @@ export default function App() {
 
     setSelected((prev) => [...prev, name]);
   };
+
+  const [proceduresData, setProceduresData] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch(`${BACKEND}/procedimientos/activos`);
+        if (!res.ok) {
+          console.error("Failed fetching procedimientos", res.status);
+          if (mounted) setProceduresData([]);
+          return;
+        }
+        const data = await res.json();
+        if (mounted) setProceduresData(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error(e);
+        if (mounted) setProceduresData([]);
+      }
+    };
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Usamos `proceduresData` directamente en el render.
 
   return (
     <div className="min-h-screen bg-[#050816] text-white overflow-x-hidden">
@@ -164,40 +163,54 @@ export default function App() {
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {procedures.map((item) => {
-              const active = selected.includes(item.name);
-              const blocked = blockedProcedure === item.name;
+            {/* Cargar procedimientos desde la API */}
+            {proceduresData === null ? (
+              // loading skeleton
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-[2rem] border border-white/10 bg-white/5 p-8 h-56 animate-pulse" />
+              ))
+            ) : proceduresData.length === 0 ? (
+              <p className="text-slate-300">No hay procedimientos disponibles.</p>
+            ) : (
+              proceduresData.map((p: any) => {
+                const name = p.nombre ?? p.name ?? "";
+                const info = p.descripcion ?? p.info ?? "";
+                const image = p.url_imagen
+                  ? p.url_imagen.startsWith("http")
+                    ? p.url_imagen
+                    : `${BACKEND}/${p.url_imagen.replace(/^\/+/, "")}`
+                  : "";
 
-              return (
-                <button
-                  key={item.name}
-                  onClick={() => toggleProcedure(item.name)}
-                  className={`procedure-hover-card p-8 ${active ? "ring-2 ring-cyan-400" : ""} ${blocked ? "ring-2 ring-red-500 bg-red-500/20 border-red-400/50" : ""}`}
-                >
-                  <div className="procedure-hover-front h-full flex flex-col items-center text-center">
-                    <p className="text-2xl font-black text-white uppercase tracking-[0.06em] leading-tight text-center">
-                      {item.name}
-                    </p>
+                const active = selected.includes(name);
+                const blocked = blockedProcedure === name;
 
-                    <p className="mt-6 text-lg md:text-xl text-slate-200 leading-8 text-center md:text-justify max-w-[28rem]">
-                      {item.info}
-                    </p>
-                  </div>
+                return (
+                  <button
+                    key={p.id ?? name}
+                    onClick={() => toggleProcedure(name)}
+                    className={`procedure-hover-card p-8 ${active ? "ring-2 ring-cyan-400" : ""} ${blocked ? "ring-2 ring-red-500 bg-red-500/20 border-red-400/50" : ""}`}
+                  >
+                    <div className="procedure-hover-front h-full flex flex-col items-center text-center">
+                      <p className="text-2xl font-black text-white uppercase tracking-[0.06em] leading-tight text-center">
+                        {name}
+                      </p>
 
-                  <div className="procedure-hover-image">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/35" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <p className="text-lg font-bold text-white">{item.name}</p>
+                      <p className="mt-6 text-lg md:text-xl text-slate-200 leading-8 text-center md:text-justify max-w-[28rem]">
+                        {info}
+                      </p>
                     </div>
-                  </div>
-                </button>
-              );
-            })}
+
+                    <div className="procedure-hover-image">
+                      <img src={image} alt={name} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/35" />
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <p className="text-lg font-bold text-white">{name}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
 
           {showLimitMessage && (

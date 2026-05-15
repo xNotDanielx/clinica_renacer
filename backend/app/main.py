@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
 from app.db.database import Base, engine
 import app.models
 from app.routes import (
@@ -7,6 +10,7 @@ from app.routes import (
     pacientes_router,
     procedimientos_router,
 )
+
 
 app = FastAPI()
 
@@ -17,6 +21,26 @@ app.include_router(pacientes_router)
 app.include_router(procedimientos_router)
 app.include_router(citas_router)
 app.include_router(codigos_promocionales_router)
+
+
+# Enable CORS for local frontend during development
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Serve uploads folder so `url_imagen` can point to /uploads/<file>
+# app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/")
 def root():
