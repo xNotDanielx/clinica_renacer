@@ -12,6 +12,7 @@ class Procedimiento(Base):
     nombre = Column(String(150), nullable=False)
     descripcion = Column(Text, nullable=False)
     precio = Column(Numeric(10, 2), nullable=False)
+    url_imagen = Column(String(255), nullable=True)
     activo = Column(Boolean, nullable=False, server_default=text("TRUE"))
     fecha_ultima_actualizacion = Column(
         DateTime,
