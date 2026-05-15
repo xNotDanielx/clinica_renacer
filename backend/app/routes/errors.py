@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.commons.exceptions import ConflictError, NotFoundError, ValidationError
+from app.common.exceptions import ConflictError, NotFoundError, ValidationError
 
 
 def to_http_exception(error: Exception) -> HTTPException:

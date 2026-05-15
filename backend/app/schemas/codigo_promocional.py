@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from app.commons.enums import TipoDescuento
+from app.common.enums import TipoDescuento
 
 
 class CodigoPromocionalBase(BaseModel):

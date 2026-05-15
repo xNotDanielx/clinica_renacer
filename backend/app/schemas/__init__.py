@@ -5,6 +5,11 @@ from app.schemas.cita import (
     CitaOut,
     CitaUpdate,
 )
+from app.schemas.administrador import (
+    AdministradorCreate,
+    AdministradorOut,
+    AdministradorUpdate,
+)
 from app.schemas.cita_procedimiento import (
     CitaProcedimientoCreate,
     CitaProcedimientoOut,
@@ -15,7 +20,7 @@ from app.schemas.codigo_promocional import (
     CodigoPromocionalOut,
     CodigoPromocionalUpdate,
 )
-from app.commons.enums import EstadoCita, TipoDescuento
+from app.common.enums import EstadoCita, TipoDescuento
 from app.schemas.paciente import PacienteCreate, PacienteOut, PacienteUpdate
 from app.schemas.procedimiento import (
     ProcedimientoCreate,
@@ -24,6 +29,9 @@ from app.schemas.procedimiento import (
 )
 
 __all__ = [
+    "AdministradorCreate",
+    "AdministradorUpdate",
+    "AdministradorOut",
     "EstadoCita",
     "TipoDescuento",
     "PacienteCreate",

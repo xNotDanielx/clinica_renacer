@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.models.cita import Cita
 from app.models.codigo_promocional import CodigoPromocional
-from app.commons.enums import TipoDescuento
-from app.commons.exceptions import NotFoundError, ValidationError
+from app.common.enums import TipoDescuento
+from app.common.exceptions import NotFoundError, ValidationError
 
 
 class CodigoPromocionalService:

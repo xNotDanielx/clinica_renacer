@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.models.paciente import Paciente
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
-from app.commons.exceptions import ConflictError, NotFoundError
+from app.common.exceptions import ConflictError, NotFoundError
 
 
 class PacienteService:
