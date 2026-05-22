@@ -6,7 +6,9 @@ from app.schemas.cita import (
     CitaUpdate,
 )
 from app.schemas.administrador import (
+    AdministradorAuthResponse,
     AdministradorCreate,
+    AdministradorLoginRequest,
     AdministradorOut,
     AdministradorUpdate,
 )
@@ -32,6 +34,8 @@ __all__ = [
     "AdministradorCreate",
     "AdministradorUpdate",
     "AdministradorOut",
+    "AdministradorLoginRequest",
+    "AdministradorAuthResponse",
     "EstadoCita",
     "TipoDescuento",
     "PacienteCreate",
