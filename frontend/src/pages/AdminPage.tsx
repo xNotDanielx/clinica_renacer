@@ -101,9 +101,7 @@ export default function AdminPage() {
           event.preventDefault();
           setLoggedIn(true);
         }}
-        onForgotPassword={() => {
-          // Botón sin funcionalidad adicional por ahora
-        }}
+        onForgotPassword={() => {}}
       />
     );
   }
@@ -114,45 +112,45 @@ export default function AdminPage() {
       <div className="fixed inset-0 -z-10 opacity-25 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:60px_60px]" />
 
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8">
-            <header className="mb-8 rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                <div className="space-y-2">
-                  <div className="inline-flex items-center gap-3 rounded-3xl bg-violet-600/10 px-4 py-2 text-sm text-violet-200 ring-1 ring-violet-500/20">
-                    <span className="h-10 w-10 rounded-2xl bg-violet-500/15 flex items-center justify-center text-lg">R</span>
-                    <span className="font-semibold">Clínica Bella</span>
-                  </div>
-                  <p className="text-2xl font-black tracking-tight">Panel de administración</p>
-                </div>
+        <header className="mb-8 rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-3 rounded-3xl bg-violet-600/10 px-4 py-2 text-sm text-violet-200 ring-1 ring-violet-500/20">
+                <span className="h-10 w-10 rounded-2xl bg-violet-500/15 flex items-center justify-center text-lg">R</span>
+                <span className="font-semibold">Clínica Renacer</span>
+              </div>
+              <p className="text-2xl font-black tracking-tight">Panel de administración</p>
+            </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                          activeTab === tab
-                            ? "bg-violet-500 text-slate-950"
-                            : "bg-white/5 text-slate-300 hover:bg-white/10"
-                        }`}
-                      >
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
+                      activeTab === tab
+                        ? "bg-violet-500 text-slate-950"
+                        : "bg-white/5 text-slate-300 hover:bg-white/10"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
 
-                  <div className="flex items-center gap-3 rounded-3xl border border-white/10 bg-slate-950/10 px-4 py-3">
-                    <span className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-semibold text-white">A</span>
-                    <div>
-                      <p className="text-sm text-slate-300">Administrador</p>
-                      <p className="text-sm font-semibold text-white">Usuario</p>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-3 rounded-3xl border border-white/10 bg-slate-950/10 px-4 py-3">
+                <span className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-lg font-semibold text-white">A</span>
+                <div>
+                  <p className="text-sm text-slate-300">Administrador</p>
+                  <p className="text-sm font-semibold text-white">Usuario</p>
                 </div>
               </div>
-            </header>
+            </div>
+          </div>
+        </header>
 
-            <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
           <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
             <div className="space-y-8">
               <div className="space-y-3">
@@ -186,6 +184,11 @@ export default function AdminPage() {
               <button
                 className="w-full rounded-3xl bg-red-500 px-4 py-4 text-sm font-semibold text-white transition hover:bg-red-400"
                 type="button"
+                onClick={() => {
+                  setLoggedIn(false);
+                  setPassword("");
+                  setActiveTab("Inicio");
+                }}
               >
                 Cerrar sesión
               </button>
@@ -371,3 +374,4 @@ export default function AdminPage() {
     </div>
   );
 }
+
