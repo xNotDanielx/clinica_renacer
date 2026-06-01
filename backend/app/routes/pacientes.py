@@ -6,6 +6,7 @@ from app.services.paciente_service import PacienteService
 
 from app.routes.deps import get_db
 from app.routes.errors import to_http_exception
+from app.common.security import get_current_administrador
 
 router = APIRouter(prefix="/pacientes", tags=["Pacientes"])
 
@@ -23,7 +24,7 @@ def crear_paciente(payload: PacienteCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{identificacion}", response_model=PacienteOut)
-def buscar_paciente(identificacion: str, db: Session = Depends(get_db)):
+def buscar_paciente(identificacion: str, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
     try:
         return PacienteService.buscar_por_identificacion(db, identificacion)
     except Exception as error:
@@ -31,7 +32,7 @@ def buscar_paciente(identificacion: str, db: Session = Depends(get_db)):
 
 
 @router.patch("/{identificacion}", response_model=PacienteOut)
-def actualizar_paciente(identificacion: str, payload: PacienteUpdate, db: Session = Depends(get_db)):
+def actualizar_paciente(identificacion: str, payload: PacienteUpdate, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
     try:
         paciente = PacienteService.actualizar_datos(db, identificacion, payload)
         db.commit()

@@ -7,6 +7,7 @@ from app.routes.deps import get_db
 from app.routes.errors import to_http_exception
 from app.schemas.cita import CitaCambiarEstadoRequest, CitaCreateRequest, CitaOut
 from app.services.cita_service import CitaService
+from app.common.security import get_current_administrador
 
 router = APIRouter(prefix="/citas", tags=["Citas"])
 
@@ -36,6 +37,7 @@ def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db)):
 def listar_citas_por_fecha(
     fecha_programada: date = Query(...),
     db: Session = Depends(get_db),
+    administrador=Depends(get_current_administrador),
 ):
     try:
         return CitaService.listar_citas_por_fecha(db, fecha_programada)
@@ -44,7 +46,7 @@ def listar_citas_por_fecha(
 
 
 @router.patch("/{cita_id}/estado", response_model=CitaOut)
-def cambiar_estado_cita(cita_id: int, payload: CitaCambiarEstadoRequest, db: Session = Depends(get_db)):
+def cambiar_estado_cita(cita_id: int, payload: CitaCambiarEstadoRequest, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
     try:
         cita = CitaService.cambiar_estado_cita(db, cita_id, payload.estado)
         db.commit()

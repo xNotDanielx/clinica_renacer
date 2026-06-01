@@ -12,3 +12,7 @@ class ConflictError(ServiceError):
 
 class ValidationError(ServiceError):
     pass
+
+
+class UnauthorizedError(ServiceError):
+    pass
