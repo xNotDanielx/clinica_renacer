@@ -16,7 +16,6 @@ class AdministradorCreate(BaseModel):
 
 class AdministradorUpdate(BaseModel):
     usuario: str | None = None
-    contrasena: str | None = None
     activo: bool | None = None
     ultimo_acceso: datetime | None = None
 
