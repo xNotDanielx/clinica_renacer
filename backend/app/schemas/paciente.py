@@ -16,6 +16,7 @@ class PacienteBase(BaseModel):
     fecha_nacimiento: datetime | None = None
     altura: float | None = None
     peso: float | None = None
+    activo: bool = True
 
 
 class PacienteCreate(PacienteBase):
@@ -34,7 +35,7 @@ class PacienteUpdate(BaseModel):
     fecha_nacimiento: datetime | None = None
     altura: float | None = None
     peso: float | None = None
-
+    activo: bool | None = None
 
 class PacienteOut(PacienteBase):
     fecha_ultima_actualizacion: datetime

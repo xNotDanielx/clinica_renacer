@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, time
 from decimal import Decimal, ROUND_HALF_UP
 
-from sqlalchemy import select
+from sqlalchemy import select, or_, cast, String
 from sqlalchemy.orm import Session, selectinload
 
 from app.common.enums import EstadoCita
@@ -158,3 +158,26 @@ class CitaService:
         cita.estado = nuevo_estado.value
         session.flush()
         return cita
+    
+    @staticmethod
+    def listar_citas(session: Session):
+        return session.query(Cita).filter(Cita.estado != EstadoCita.PENDIENTE_APROBACION.value).all()
+    
+    @staticmethod
+    def listar_citas(session: Session, buscar: str | None = None):
+        query = session.query(Cita).filter(
+            Cita.estado != EstadoCita.PENDIENTE_APROBACION.value
+        )
+
+        if buscar:
+            query = query.filter(
+                or_(
+                    Cita.estado.ilike(f"%{buscar}%"),
+                    cast(Cita.fecha_programada, String).ilike(f"%{buscar}%"),
+                    Cita.paciente.has(
+                        Paciente.nombre_completo.ilike(f"%{buscar}%")
+                    ),
+                )
+            )
+
+        return query.all()

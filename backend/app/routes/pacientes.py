@@ -41,3 +41,10 @@ def actualizar_paciente(identificacion: str, payload: PacienteUpdate, db: Sessio
     except Exception as error:
         db.rollback()
         raise to_http_exception(error)
+
+@router.get("", response_model=list[PacienteOut])
+def listar_pacientes_activos(db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        return PacienteService.listar_pacientes_activos(db)
+    except Exception as error:
+        raise to_http_exception(error)

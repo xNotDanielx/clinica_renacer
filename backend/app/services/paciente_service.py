@@ -32,3 +32,7 @@ class PacienteService:
             setattr(paciente, campo, valor)
         session.flush()
         return paciente
+
+    @staticmethod
+    def listar_pacientes_activos(session: Session):
+        return session.query(Paciente).filter(Paciente.activo.is_(True)).all()

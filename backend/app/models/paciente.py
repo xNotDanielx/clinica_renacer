@@ -1,4 +1,5 @@
-from sqlalchemy import CheckConstraint, Column, DateTime, Float, String, text
+
+from sqlalchemy import CheckConstraint, Column, DateTime, Float, String, text, Boolean
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
@@ -49,6 +50,7 @@ class Paciente(Base):
     fecha_nacimiento = Column(DateTime, nullable=True)
     altura = Column(Float, nullable=True)
     peso = Column(Float, nullable=True)
+    activo = Column(Boolean, nullable=False, server_default=text("true"))
     fecha_ultima_actualizacion = Column(
         DateTime,
         nullable=False,
