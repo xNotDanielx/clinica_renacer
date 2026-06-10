@@ -81,30 +81,3 @@ body {
   @apply rounded-[2rem] bg-white/5 p-4 shadow-2xl border border-white/10 backdrop-blur-xl;
 }
 
-.form-field {
-  @apply flex flex-col gap-2;
-}
-
-.form-label {
-  @apply text-sm md:text-base font-semibold text-white;
-}
-
-.form-input {
-  @apply w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm md:text-base text-white outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:bg-white/10;
-}
-
-.form-error {
-  @apply mt-1 text-sm text-red-300;
-}
-
-.phone-group {
-  @apply flex items-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition focus-within:border-cyan-400 focus-within:bg-white/10;
-}
-
-.phone-code-select {
-  @apply min-w-[110px] md:min-w-[125px] border-r border-white/10 bg-transparent px-3 py-3 text-sm md:text-base text-white outline-none;
-}
-
-.phone-number-input {
-  @apply w-full bg-transparent px-4 py-3 text-sm md:text-base text-white outline-none;
-}

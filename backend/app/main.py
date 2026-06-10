@@ -19,15 +19,18 @@ app = FastAPI()
 
 @app.exception_handler(ServiceError)
 def handle_service_error(_: Request, error: ServiceError):
-    status_code = 500
-    if error.__class__.__name__ == "NotFoundError":
+    from app.common.exceptions import ConflictError, NotFoundError, UnauthorizedError, ValidationError
+
+    if isinstance(error, NotFoundError):
         status_code = 404
-    elif error.__class__.__name__ == "ConflictError":
+    elif isinstance(error, ConflictError):
         status_code = 409
-    elif error.__class__.__name__ == "UnauthorizedError":
+    elif isinstance(error, UnauthorizedError):
         status_code = 401
-    elif error.__class__.__name__ == "ValidationError":
+    elif isinstance(error, ValidationError):
         status_code = 422
+    else:
+        status_code = 500
 
     return JSONResponse(status_code=status_code, content={"detail": str(error)})
 
