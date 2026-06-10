@@ -34,13 +34,13 @@ def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[CitaOut])
-def listar_citas_por_fecha(
-    fecha_programada: date = Query(...),
+def listar_citas(
+    buscar: str | None = None,
     db: Session = Depends(get_db),
     administrador=Depends(get_current_administrador),
 ):
     try:
-        return CitaService.listar_citas_por_fecha(db, fecha_programada)
+        return CitaService.listar_citas(db, buscar)
     except Exception as error:
         raise to_http_exception(error)
 
@@ -55,3 +55,11 @@ def cambiar_estado_cita(cita_id: int, payload: CitaCambiarEstadoRequest, db: Ses
     except Exception as error:
         db.rollback()
         raise to_http_exception(error)
+@router.get("/todas", response_model=list[CitaOut])
+def listar_citas(db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        return CitaService.listar_citas(db)
+    except Exception as error:
+        raise to_http_exception(error)
+    
+

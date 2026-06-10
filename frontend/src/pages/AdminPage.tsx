@@ -90,6 +90,44 @@ export default function AdminPage() {
     [appointmentQuery]
   );
 
+  const handleLogin = async (
+  event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/administradores/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuario: username,
+            contrasena: password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Credenciales inválidas");
+      }
+
+      const data = await response.json();
+
+      localStorage.setItem(
+        "access_token",
+        data.access_token
+      );
+
+      setLoggedIn(true);
+    } catch (error) {
+      console.error(error);
+      alert("Usuario o contraseña incorrectos");
+    }
+  };
+
   if (!loggedIn) {
     return (
       <AdminLogin
@@ -97,10 +135,7 @@ export default function AdminPage() {
         password={password}
         onUsernameChange={setUsername}
         onPasswordChange={setPassword}
-        onSubmit={(event) => {
-          event.preventDefault();
-          setLoggedIn(true);
-        }}
+        onSubmit={handleLogin}
         onForgotPassword={() => {}}
       />
     );
