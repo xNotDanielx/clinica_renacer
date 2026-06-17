@@ -33,14 +33,14 @@ def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db)):
         raise to_http_exception(error)
 
 
-@router.get("", response_model=list[CitaOut])
-def listar_citas(
+@router.get("/filtrar", response_model=list[CitaOut])
+def filtrar_citas(
     buscar: str | None = None,
     db: Session = Depends(get_db),
     administrador=Depends(get_current_administrador),
 ):
     try:
-        return CitaService.listar_citas(db, buscar)
+        return CitaService.filtrar_citas(db, buscar)
     except Exception as error:
         raise to_http_exception(error)
 
@@ -55,6 +55,7 @@ def cambiar_estado_cita(cita_id: int, payload: CitaCambiarEstadoRequest, db: Ses
     except Exception as error:
         db.rollback()
         raise to_http_exception(error)
+    
 @router.get("/todas", response_model=list[CitaOut])
 def listar_citas(db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
     try:
@@ -62,4 +63,40 @@ def listar_citas(db: Session = Depends(get_db), administrador=Depends(get_curren
     except Exception as error:
         raise to_http_exception(error)
     
+@router.get("/pendientes-aprobacion", response_model=list[CitaOut])
+def listar_citas_pendientes_aprobacion(db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        return CitaService.listar_citas_pendientes_aprobacion(db)
+    except Exception as error:
+        print (error)
+        raise to_http_exception(error)
+@router.patch("/{cita_id}/aprobar", response_model=CitaOut)
+def aprobar_cita(cita_id: int, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        cita = CitaService.autorizar_cita(db, cita_id)
+        db.commit()
+        db.refresh(cita)
+        return cita
+    except Exception as e:
+        print(e)
+        raise
 
+@router.patch("/{cita_id}/rechazar", response_model=CitaOut)
+def rechazar_cita(cita_id: int, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        cita = CitaService.rechazar_cita(db, cita_id)
+        db.commit()
+        db.refresh(cita)
+        return cita
+    except Exception as e:
+        print(e)
+        raise
+    
+@router.delete("/{cita_id}", status_code=204)
+def eliminar_cita(cita_id: int, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        CitaService.eliminar_cita(db, cita_id)
+        db.commit()
+    except Exception as error:
+        db.rollback()
+        raise to_http_exception(error)

@@ -11,6 +11,7 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     text,
+    Boolean
 )
 from sqlalchemy.orm import relationship
 
@@ -54,6 +55,7 @@ class Cita(Base):
     notas_asesoria = Column(Text, nullable=True)
     razon_rechazo = Column(Text, nullable=True)
     estado = Column(String(30), nullable=False)
+    activo = Column(Boolean, nullable=False, server_default=text("true"))
     fecha_ultima_actualizacion = Column(
         DateTime,
         nullable=False,
@@ -63,3 +65,9 @@ class Cita(Base):
     paciente = relationship("Paciente", back_populates="citas")
     codigo_promocional = relationship("CodigoPromocional", back_populates="citas")
     citas_procedimientos = relationship("CitaProcedimiento", back_populates="cita")
+
+    @property
+    def nombre_paciente(self):
+        if self.paciente:
+            return self.paciente.nombre_completo
+        return None
