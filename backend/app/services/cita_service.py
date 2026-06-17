@@ -161,23 +161,64 @@ class CitaService:
     
     @staticmethod
     def listar_citas(session: Session):
-        return session.query(Cita).filter(Cita.estado != EstadoCita.PENDIENTE_APROBACION.value).all()
+        return session.query(Cita).filter(
+            Cita.activo.is_(True),
+            Cita.estado != EstadoCita.PENDIENTE_APROBACION.value
+            ).all()
     
     @staticmethod
-    def listar_citas(session: Session, buscar: str | None = None):
-        query = session.query(Cita).filter(
-            Cita.estado != EstadoCita.PENDIENTE_APROBACION.value
+    def listar_citas_pendientes_aprobacion(session: Session):
+        return session.query(Cita).filter(
+            Cita.activo.is_(True),
+            Cita.estado == EstadoCita.PENDIENTE_APROBACION.value
+            ).all()
+    
+    @staticmethod
+    def autorizar_cita(session: Session, cita_id: int) -> Cita:
+        return CitaService.cambiar_estado_cita(
+            session, 
+            cita_id, 
+            EstadoCita.APROBADA
+            )
+    
+    @staticmethod
+    def rechazar_cita(session: Session, cita_id: int) -> Cita:
+        return CitaService.cambiar_estado_cita(
+            session, 
+            cita_id, 
+            EstadoCita.CANCELADA
+            )
+
+
+    @staticmethod
+    def filtrar_citas(session: Session, buscar: str | None = None):
+        query = (
+            session.query(Cita)
+            .join(Paciente)
+            .filter(
+                Cita.activo.is_(True),
+                Cita.estado != EstadoCita.PENDIENTE_APROBACION.value
+            )
         )
 
         if buscar:
             query = query.filter(
                 or_(
+                    cast(Cita.id, String).ilike(f"%{buscar}%"),
+                    Cita.id_paciente.ilike(f"%{buscar}%"),
                     Cita.estado.ilike(f"%{buscar}%"),
                     cast(Cita.fecha_programada, String).ilike(f"%{buscar}%"),
-                    Cita.paciente.has(
-                        Paciente.nombre_completo.ilike(f"%{buscar}%")
-                    ),
+                    Paciente.nombre_completo.ilike(f"%{buscar}%"),
                 )
             )
 
         return query.all()
+    
+    @staticmethod
+    def eliminar_cita(session: Session, cita_id: int):
+        cita = session.get(Cita, cita_id)
+        if not cita:
+            raise NotFoundError("Cita no encontrada")
+        
+        cita.activo = False
+        session.flush()

@@ -22,6 +22,12 @@ def crear_paciente(payload: PacienteCreate, db: Session = Depends(get_db)):
         db.rollback()
         raise to_http_exception(error)
 
+@router.get("/filtrar", response_model=list[PacienteOut])
+def filtrar_pacientes(buscar: str | None = None, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        return PacienteService.filtrar_pacientes(db, buscar)
+    except Exception as error:
+        raise to_http_exception(error)
 
 @router.get("/{identificacion}", response_model=PacienteOut)
 def buscar_paciente(identificacion: str, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
@@ -47,4 +53,13 @@ def listar_pacientes_activos(db: Session = Depends(get_db), administrador=Depend
     try:
         return PacienteService.listar_pacientes_activos(db)
     except Exception as error:
+        raise to_http_exception(error)
+    
+@router.delete("/{identificacion}", status_code=204)
+def eliminar_paciente(identificacion: str, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
+    try:
+        PacienteService.eliminar_paciente(db, identificacion)
+        db.commit()
+    except Exception as error:
+        db.rollback()
         raise to_http_exception(error)

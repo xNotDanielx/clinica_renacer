@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-
+from sqlalchemy import or_, cast, String
 from app.models.paciente import Paciente
 from app.schemas.paciente import PacienteCreate, PacienteUpdate
 from app.common.exceptions import ConflictError, NotFoundError
@@ -16,12 +16,19 @@ class PacienteService:
         session.add(paciente)
         session.flush()
         return paciente
+    
+    @staticmethod
+    def crear_o_obtener_paciente(session: Session, data: PacienteCreate) -> Paciente:
+        paciente = PacienteService.buscar_por_identificacion(session, data.identificacion)
+        if paciente:
+            return paciente
+        return PacienteService.crear_paciente(session, data)
 
     @staticmethod
     def buscar_por_identificacion(session: Session, identificacion: str) -> Paciente:
         paciente = session.get(Paciente, identificacion)
         if not paciente:
-            raise NotFoundError("Paciente no encontrado")
+            return
         return paciente
 
     @staticmethod
@@ -36,3 +43,34 @@ class PacienteService:
     @staticmethod
     def listar_pacientes_activos(session: Session):
         return session.query(Paciente).filter(Paciente.activo.is_(True)).all()
+    
+    @staticmethod
+    def filtrar_pacientes(session: Session, buscar: str | None = None):
+        query = session.query(Paciente).filter(
+            Paciente.activo.is_(True)
+        )
+
+        if buscar:
+            query = query.filter(
+                or_(
+                    cast(Paciente.identificacion, String).ilike(f"%{buscar}%"),
+                    Paciente.nombre_completo.ilike(f"%{buscar}%"),
+                    Paciente.telefono.ilike(f"%{buscar}%"),
+                    Paciente.email.ilike(f"%{buscar}%"),
+                    Paciente.direccion.ilike(f"%{buscar}%"),
+                    Paciente.nacionalidad.ilike(f"%{buscar}%"),
+                    Paciente.sexo.ilike(f"%{buscar}%"),
+                    Paciente.genero.ilike(f"%{buscar}%"),
+                )
+            )
+
+        return query.all()
+    
+    @staticmethod
+    def eliminar_paciente(session: Session, identificacion: str):
+        paciente = PacienteService.buscar_por_identificacion(session, identificacion)
+        if not paciente:
+            raise NotFoundError("Paciente no encontrado")
+        
+        paciente.activo = False
+        session.flush()
