@@ -1,56 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLogin from "../components/AdminLogin";
+import { apiFetch } from "../components/api";
 
 type TabKey = "Inicio" | "Pacientes" | "Citas" | "Autorizar Citas";
 
-type Patient = {
-  id: number;
-  name: string;
-  phone: string;
-  email: string;
-};
-
-type Appointment = {
-  id: number;
-  patient: string;
-  date: string;
-  time: string;
-  service: string;
-  status: "Pendiente" | "Confirmada" | "Cancelada";
-};
-
-type Authorization = {
-  id: number;
-  patient: string;
-  date: string;
-  time: string;
-  service: string;
-};
-
 const tabs: TabKey[] = ["Inicio", "Pacientes", "Citas", "Autorizar Citas"];
-
-const patients: Patient[] = [
-  { id: 1, name: "María González", phone: "+569 1234 5678", email: "maria@gmail.com" },
-  { id: 2, name: "Juan Pérez", phone: "+569 8765 4321", email: "juanperez@gmail.com" },
-  { id: 3, name: "Carla Rodríguez", phone: "+569 2345 6789", email: "carla.rodriguez@gmail.com" },
-  { id: 4, name: "Pedro Sánchez", phone: "+569 3456 7890", email: "pedro.sanchez@gmail.com" },
-  { id: 5, name: "Laura Martínez", phone: "+569 4567 8901", email: "laura.martinez@gmail.com" },
-];
-
-const appointments: Appointment[] = [
-  { id: 1, patient: "María González", date: "25/05/2024", time: "10:00", service: "Limpieza Facial", status: "Pendiente" },
-  { id: 2, patient: "Juan Pérez", date: "25/05/2024", time: "11:30", service: "Botox", status: "Confirmada" },
-  { id: 3, patient: "Carla Rodríguez", date: "26/05/2024", time: "09:00", service: "Relleno de Labios", status: "Pendiente" },
-  { id: 4, patient: "Pedro Sánchez", date: "26/05/2024", time: "15:00", service: "Depilación Láser", status: "Cancelada" },
-  { id: 5, patient: "Laura Martínez", date: "27/05/2024", time: "13:00", service: "Micropigmentación", status: "Confirmada" },
-];
-
-const authorizations: Authorization[] = [
-  { id: 1, patient: "María González", date: "25/05/2024", time: "10:00", service: "Limpieza Facial" },
-  { id: 2, patient: "Carla Rodríguez", date: "26/05/2024", time: "09:00", service: "Relleno de Labios" },
-  { id: 3, patient: "Pedro Sánchez", date: "27/05/2024", time: "11:00", service: "Peeling Químico" },
-  { id: 4, patient: "Ana Torres", date: "28/05/2024", time: "14:30", service: "Botox" },
-];
 
 const statusClasses = {
   Pendiente: "bg-yellow-500/10 text-yellow-300 border-yellow-500/20",
@@ -67,28 +21,200 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("Inicio");
   const [patientQuery, setPatientQuery] = useState("");
   const [appointmentQuery, setAppointmentQuery] = useState("");
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [pendingAppointments, setPendingAppointments] = useState<any[]>([]);
+  const [patients, setPatients] = useState<any[]>([]);
 
-  const filteredPatients = useMemo(
+  const authorizations = useMemo(
     () =>
-      patients.filter((patient) =>
-        [patient.name, patient.phone, patient.email]
-          .join(" ")
-          .toLowerCase()
-          .includes(patientQuery.toLowerCase())
-      ),
-    [patientQuery]
-  );
-
-  const filteredAppointments = useMemo(
-    () =>
-      appointments.filter((appointment) =>
-        [appointment.patient, appointment.date, appointment.time, appointment.service]
+      pendingAppointments.filter((appointment) =>
+        [appointment.id_paciente,
+          appointment.fecha_programada,
+          appointment.hora_inicio,
+          appointment.estado]
           .join(" ")
           .toLowerCase()
           .includes(appointmentQuery.toLowerCase())
       ),
-    [appointmentQuery]
+    [pendingAppointments, appointmentQuery]
   );
+
+  const cargarCitas = async () => {
+  try {
+    const data = await apiFetch("/citas/todas");
+    setAppointments(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const buscarCitas = async (query: string) => {
+    try {
+      const data = await apiFetch(`/citas/filtrar?buscar=${encodeURIComponent(query)}`);
+      setAppointments(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const eliminarCita = async (cita_id: number) => {
+    try {
+      await apiFetch(`/citas/${cita_id}`, {
+        method: "DELETE",
+      });
+      cargarCitas();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const cargarPendientes = async () => {
+  try {
+    const data = await apiFetch("/citas/pendientes-aprobacion");
+    setPendingAppointments(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const cargarPacientes = async () => {
+    try {
+      const data = await apiFetch("/pacientes");
+      setPatients(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const buscarPacientes = async (query: string) => {
+    try {
+      const data = await apiFetch(`/pacientes/filtrar?buscar=${encodeURIComponent(query)}`);
+      setPatients(data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const eliminarPaciente = async (identificacion: string) => {
+    try {
+      await apiFetch(`/pacientes/${identificacion}`, {
+        method: "DELETE",
+      });
+      cargarPacientes();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const autorizarCita = async (cita_id: number) => {
+    try {
+      await apiFetch(`/citas/${cita_id}/aprobar`, {
+        method: "PATCH",
+      });
+      cargarPendientes();
+      cargarCitas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const rechazarCita = async (cita_id: number) => {
+    try {
+      await apiFetch(`/citas/${cita_id}/rechazar`, {
+        method: "PATCH",
+      });
+      cargarPendientes();
+      cargarCitas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (loggedIn) {
+      cargarCitas();
+      cargarPendientes();
+      cargarPacientes();
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
+  if (activeTab !== "Citas") return;
+
+  const timeout = setTimeout(() => {
+    if (appointmentQuery.trim() === "") {
+      cargarCitas();
+    } else {
+      buscarCitas(appointmentQuery);
+    }
+  }, 300);
+
+  return () => clearTimeout(timeout);
+  }, [appointmentQuery, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "Autorizar Citas") return;
+
+    const timeout = setTimeout(() => {
+      if (appointmentQuery.trim() === "") {
+        cargarPendientes();
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [appointmentQuery, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "Pacientes") return;
+
+    const timeout = setTimeout(() => {
+      if (patientQuery.trim() === "") {
+        cargarPacientes();
+      } else {
+        buscarPacientes(patientQuery);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [patientQuery, activeTab]);
+
+  const handleLogin = async (
+  event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(
+        "http://localhost:8000/administradores/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuario: username,
+            contrasena: password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Credenciales inválidas");
+      }
+
+      const data = await response.json();
+
+      localStorage.setItem(
+        "access_token",
+        data.access_token
+      );
+
+      setLoggedIn(true);
+    } catch (error) {
+      console.error(error);
+      alert("Usuario o contraseña incorrectos");
+    }
+  };
 
   if (!loggedIn) {
     return (
@@ -97,10 +223,7 @@ export default function AdminPage() {
         password={password}
         onUsernameChange={setUsername}
         onPasswordChange={setPassword}
-        onSubmit={(event) => {
-          event.preventDefault();
-          setLoggedIn(true);
-        }}
+        onSubmit={handleLogin}
         onForgotPassword={() => {}}
       />
     );
@@ -246,16 +369,18 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10 bg-slate-950/70 text-sm text-slate-200">
-                      {filteredPatients.map((patient) => (
-                        <tr key={patient.id}>
-                          <td className="px-6 py-4 font-semibold text-cyan-300">{patient.id}</td>
-                          <td className="px-6 py-4">{patient.name}</td>
-                          <td className="px-6 py-4">{patient.phone}</td>
+                      {patients.map((patient) => (
+                        <tr key={patient.identificacion}>
+                          <td className="px-6 py-4 font-semibold text-cyan-300">{patient.identificacion}</td>
+                          <td className="px-6 py-4">{patient.nombre_completo}</td>
+                          <td className="px-6 py-4">{patient.telefono}</td>
                           <td className="px-6 py-4">{patient.email}</td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
                               <button className="rounded-2xl bg-cyan-400/10 px-3 py-2 text-sm font-semibold text-cyan-200 hover:bg-cyan-400/20">Editar</button>
-                              <button className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20">Eliminar</button>
+                              <button 
+                              onClick={() => eliminarPaciente(patient.identificacion)}
+                              className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20">Eliminar</button>
                             </div>
                           </td>
                         </tr>
@@ -289,32 +414,36 @@ export default function AdminPage() {
                   <table className="min-w-full divide-y divide-white/10">
                     <thead className="bg-slate-950/70 text-left text-sm uppercase tracking-[0.2em] text-slate-400">
                       <tr>
-                        <th className="px-6 py-4">ID</th>
+                        <th className="px-6 py-4">Identificación</th>
                         <th className="px-6 py-4">Paciente</th>
                         <th className="px-6 py-4">Fecha</th>
                         <th className="px-6 py-4">Hora</th>
-                        <th className="px-6 py-4">Servicio</th>
                         <th className="px-6 py-4">Estado</th>
                         <th className="px-6 py-4">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10 bg-slate-950/70 text-sm text-slate-200">
-                      {filteredAppointments.map((appointment) => (
+                      {appointments.map((appointment) => (
                         <tr key={appointment.id}>
-                          <td className="px-6 py-4 font-semibold text-cyan-300">{appointment.id}</td>
-                          <td className="px-6 py-4">{appointment.patient}</td>
-                          <td className="px-6 py-4">{appointment.date}</td>
-                          <td className="px-6 py-4">{appointment.time}</td>
-                          <td className="px-6 py-4">{appointment.service}</td>
+                          <td className="px-6 py-4 font-semibold text-cyan-300">{appointment.id_paciente}</td>
+                          <td className="px-6 py-4">{appointment.nombre_paciente}</td>
+                          <td className="px-6 py-4">{appointment.fecha_programada}</td>
+                          <td className="px-6 py-4">{appointment.hora_inicio}</td>
                           <td className="px-6 py-4">
-                            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${statusClasses[appointment.status]}`}>
-                              {appointment.status}
+                            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${
+                              statusClasses[appointment.estado as keyof typeof statusClasses] || "bg-gray-500/10 text-gray-300 border-gray-500/20"}`}>
+                              {appointment.estado}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex gap-2">
                               <button className="rounded-2xl bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-500/20">Editar</button>
-                              <button className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20">Eliminar</button>
+                              <button 
+                                className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20"
+                                onClick={() => eliminarCita(appointment.id)}
+                              >
+                                Eliminar
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -343,22 +472,27 @@ export default function AdminPage() {
                         <th className="px-6 py-4">Paciente</th>
                         <th className="px-6 py-4">Fecha</th>
                         <th className="px-6 py-4">Hora</th>
-                        <th className="px-6 py-4">Servicio</th>
                         <th className="px-6 py-4">Acciones</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10 bg-slate-950/70 text-sm text-slate-200">
                       {authorizations.map((item) => (
                         <tr key={item.id}>
-                          <td className="px-6 py-4 font-semibold text-cyan-300">{item.id}</td>
-                          <td className="px-6 py-4">{item.patient}</td>
-                          <td className="px-6 py-4">{item.date}</td>
-                          <td className="px-6 py-4">{item.time}</td>
-                          <td className="px-6 py-4">{item.service}</td>
+                          <td className="px-6 py-4 font-semibold text-cyan-300">{item.id_paciente}</td>
+                          <td className="px-6 py-4">{item.nombre_paciente}</td>
+                          <td className="px-6 py-4">{item.fecha_programada}</td>
+                          <td className="px-6 py-4">{item.hora_inicio}</td>
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-2">
-                              <button className="rounded-2xl bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20">Autorizar</button>
-                              <button className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20">Rechazar</button>
+                              <button 
+                              onClick={() => autorizarCita(item.id)}
+                              className="rounded-2xl bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-500/20"
+                              >
+                                Autorizar
+                              </button>
+                              <button 
+                              onClick={() => rechazarCita(item.id)}
+                              className="rounded-2xl bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20">Rechazar</button>
                             </div>
                           </td>
                         </tr>

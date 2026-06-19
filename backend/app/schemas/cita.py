@@ -8,6 +8,7 @@ from app.common.enums import EstadoCita
 
 class CitaBase(BaseModel):
     id_paciente: str
+    nombre_paciente: str | None = None
     id_codigo_promocional: int | None = None
     fecha_programada: date
     hora_inicio: time
