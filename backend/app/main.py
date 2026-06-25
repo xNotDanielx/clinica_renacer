@@ -11,6 +11,7 @@ from app.routes import (
     codigos_promocionales_router,
     pacientes_router,
     procedimientos_router,
+    enums_router,
 )
 
 
@@ -43,7 +44,7 @@ app.include_router(procedimientos_router)
 app.include_router(citas_router)
 app.include_router(codigos_promocionales_router)
 app.include_router(administradores_router)
-
+app.include_router(enums_router)
 
 # Enable CORS for local frontend during development
 origins = [
