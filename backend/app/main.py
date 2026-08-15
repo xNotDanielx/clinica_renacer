@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.lifespan import lifespan
 from app.common.exceptions import ServiceError
 from app.db.database import Base, engine, ensure_schema_compatibility
 import app.models
@@ -15,7 +16,12 @@ from app.routes import (
 )
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Clinica Renacer API",
+    description="API para la gestión de la clínica Renacer",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 
 @app.exception_handler(ServiceError)
