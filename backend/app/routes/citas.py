@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.routes.deps import get_db
 from app.routes.errors import to_http_exception
-from app.schemas.cita import CitaCambiarEstadoRequest, CitaCreateRequest, CitaOut
+from app.schemas.cita import CitaCambiarEstadoRequest, CitaCreateRequest, CitaOut, CitaPublicaRequest
 from app.services.cita_service import CitaService
 from app.common.security import get_current_administrador
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/citas", tags=["Citas"])
 
 
 @router.post("", response_model=CitaOut, status_code=201)
-def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db)):
+def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db), administrador=Depends(get_current_administrador)):
     try:
         cita = CitaService.crear_cita(
             db,
@@ -27,6 +27,49 @@ def crear_cita(payload: CitaCreateRequest, db: Session = Depends(get_db)):
             nota=payload.nota,
             estado=payload.estado,
         )
+        db.commit()
+        db.refresh(cita)
+        return cita
+    except Exception as error:
+        db.rollback()
+        raise to_http_exception(error)
+    
+@router.post("/publica", response_model=CitaOut, status_code=201)
+def crear_cita_publica(payload: CitaPublicaRequest, db: Session = Depends(get_db)):
+    try:
+        cita = CitaService.crear_cita_publica(
+            db,
+            nombre_completo=payload.nombre_completo,
+            tipo_identificacion=payload.tipo_identificacion,
+            identificacion=payload.identificacion,
+            telefono=payload.telefono,
+            email=payload.email,
+            direccion=payload.direccion,
+            sexo=payload.sexo,
+            fecha_programada=payload.fecha_programada,
+            hora=payload.hora,
+            procedimiento_ids=payload.procedimiento_ids,
+            nota=payload.nota,
+            valor_consulta=payload.valor_consulta,
+        )
+        return cita
+    except Exception as error:
+        db.rollback()
+        raise error
+    
+from app.schemas.cita import CitaUpdate
+
+@router.patch("/{cita_id}", response_model=CitaOut)
+def actualizar_cita(
+    cita_id: int,
+    payload: CitaUpdate,
+    db: Session = Depends(get_db),
+    administrador=Depends(get_current_administrador),
+):
+    try:
+        cita = CitaService.actualizar_cita(db, cita_id, payload)
+        db.commit()
+        db.refresh(cita)
         return cita
     except Exception as error:
         db.rollback()
@@ -100,3 +143,14 @@ def eliminar_cita(cita_id: int, db: Session = Depends(get_db), administrador=Dep
     except Exception as error:
         db.rollback()
         raise to_http_exception(error)
+    
+@router.get("/horarios-disponibles")
+def horarios_disponibles(
+    fecha: date = Query(...),
+    db: Session = Depends(get_db),
+):
+    horarios = CitaService.obtener_horarios_disponibles(db, fecha)
+    return {
+        "fecha": fecha.isoformat(),
+        "horarios": horarios,
+    }
