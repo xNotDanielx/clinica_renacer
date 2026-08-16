@@ -1,51 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../components/api";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
 
 const fallbackProcedures = [
-  { id: 1, nombre: "Lipopapada", descripcion: "Reduce el exceso de grasa bajo el mentón y define el perfil facial.", url_imagen: "https://doctormonroy.com/wp-content/uploads/2020/01/rinoplastia-Bogota.jpg" },
-  { id: 2, nombre: "Aumento Mamario Simple", descripcion: "Mejora el volumen y la armonía del busto con un resultado natural.", url_imagen: "https://doctorfajardo.com/wp-content/uploads/2021/12/aumento-de-senos.jpg" },
-  { id: 3, nombre: "Mastopexia Circunvertical", descripcion: "Eleva y remodela el busto con una técnica de cicatriz vertical.", url_imagen: "https://objects-mx.cdn-topdoctors.com/article/22127/image/large/mastopexia-cirugia-para-levantar-rejuvenecer-senos-1747698085-1747698134.jpg" },
-  { id: 4, nombre: "Mastopexia T Invertida", descripcion: "Lifting mamario indicado para mayor caída o exceso de piel.", url_imagen: "https://cbcestetica.com/wp-content/uploads/2016/03/maxtopexia.jpg" },
-  { id: 5, nombre: "Lipoescultura 360 con Transferencia Glútea", descripcion: "Moldea el contorno corporal y aporta volumen glúteo con grasa propia.", url_imagen: "https://opcionmedica.es/wp-content/uploads/2019/03/liposuccion-360.jpg" },
-  { id: 6, nombre: "Lipoabdominoplastia con Transferencia Glútea", descripcion: "Define abdomen y cintura, combinando retracción abdominal y proyección glútea.", url_imagen: "https://jorgeafanador.com/wp-content/uploads/2018/11/Abdominoplastia-cirugia-estetica-plastica.jpg" },
-];
-
-const countries = [
-  { code: "CL", label: "Chile", dial: "56", flag: "🇨🇱" },
-  { code: "AR", label: "Argentina", dial: "54", flag: "🇦🇷" },
-  { code: "BO", label: "Bolivia", dial: "591", flag: "🇧🇴" },
-  { code: "BR", label: "Brasil", dial: "55", flag: "🇧🇷" },
-  { code: "CA", label: "Canadá", dial: "1", flag: "🇨🇦" },
-  { code: "CO", label: "Colombia", dial: "57", flag: "🇨🇴" },
-  { code: "CR", label: "Costa Rica", dial: "506", flag: "🇨🇷" },
-  { code: "CU", label: "Cuba", dial: "53", flag: "🇨🇺" },
-  { code: "DO", label: "República Dominicana", dial: "1", flag: "🇩🇴" },
-  { code: "EC", label: "Ecuador", dial: "593", flag: "🇪🇨" },
-  { code: "SV", label: "El Salvador", dial: "503", flag: "🇸🇻" },
-  { code: "GT", label: "Guatemala", dial: "502", flag: "🇬🇹" },
-  { code: "HN", label: "Honduras", dial: "504", flag: "🇭🇳" },
-  { code: "MX", label: "México", dial: "52", flag: "🇲🇽" },
-  { code: "NI", label: "Nicaragua", dial: "505", flag: "🇳🇮" },
-  { code: "PA", label: "Panamá", dial: "507", flag: "🇵🇦" },
-  { code: "PY", label: "Paraguay", dial: "595", flag: "🇵🇾" },
-  { code: "PE", label: "Perú", dial: "51", flag: "🇵🇪" },
-  { code: "PR", label: "Puerto Rico", dial: "1", flag: "🇵🇷" },
-  { code: "US", label: "Estados Unidos", dial: "1", flag: "🇺🇸" },
-  { code: "UY", label: "Uruguay", dial: "598", flag: "🇺🇾" },
-  { code: "VE", label: "Venezuela", dial: "58", flag: "🇻🇪" },
-  { code: "ES", label: "España", dial: "34", flag: "🇪🇸" },
-  { code: "DE", label: "Alemania", dial: "49", flag: "🇩🇪" },
-  { code: "GB", label: "Inglaterra", dial: "44", flag: "🇬🇧" },
-];
-
-const documentTypes = [
-  { value: "RUT", label: "RUT (Chile)" },
-  { value: "RUN", label: "RUN" },
-  { value: "DNI", label: "DNI" },
-  { value: "PASSPORT", label: "Pasaporte" },
-  { value: "CE", label: "Cédula de extranjería" },
-  { value: "OTRO", label: "Otro" },
+  { id: 1, nombre: "Procedimiento A", descripcion: "Descripción genérica del procedimiento.", url_imagen: "" },
+  { id: 2, nombre: "Procedimiento B", descripcion: "Descripción genérica del procedimiento.", url_imagen: "" },
+  { id: 3, nombre: "Procedimiento C", descripcion: "Descripción genérica del procedimiento.", url_imagen: "" },
 ];
 
 const galleryPairs = Array.from({ length: 9 }).map((_, index) => ({
@@ -61,19 +22,40 @@ type FormData = {
   documento: string;
   prefijo: string;
   celular: string;
+  email: string;
+  direccion: string;
+  sexo: string;
   fecha: string;
+  hora: string;
   procedimiento1: string;
   procedimiento2: string;
   mensaje: string;
 };
 
+type CatalogosResponse = {
+  sexos: string[];
+  generos: string[];
+  tipos_documento: string[];
+  prefijos_telefonicos: CountryPrefix[];
+};
+
+type CountryPrefix = {
+  code: string;
+  label: string;
+  dial: string;
+};
+
 const initialForm: FormData = {
   nombre: "",
-  tipoDocumento: "RUT",
+  tipoDocumento: "cedula_chilena",
   documento: "",
   prefijo: "56",
   celular: "",
+  email: "",
+  direccion: "",
+  sexo: "",
   fecha: "",
+  hora: "",
   procedimiento1: "",
   procedimiento2: "",
   mensaje: "",
@@ -85,20 +67,31 @@ function getMinDate() {
   return date.toISOString().slice(0, 10);
 }
 
-function prefixLabel(dial: string, flag: string) {
-  return `${flag} +${dial}`;
+function countryCodeToFlag(code: string) {
+  return code
+    .toUpperCase()
+    .split("")
+    .map((char) => String.fromCodePoint(127397 + char.charCodeAt(0)))
+    .join("");
+}
+
+function prefixLabel(dial: string, code: string, label: string) {
+  return `${countryCodeToFlag(code)} ${label} +${dial}`;
 }
 
 export default function HomePage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [blockedProcedure, setBlockedProcedure] = useState<string | null>(null);
   const [showLimitMessage, setShowLimitMessage] = useState(false);
+  const [catalogos, setCatalogos] = useState<CatalogosResponse | null>(null);
   const [proceduresData, setProceduresData] = useState<any[] | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState<FormData>(initialForm);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [availableHours, setAvailableHours] = useState<string[]>([]);
   const minDate = getMinDate();
-  const selectedCountry = useMemo(() => countries.find((c) => c.dial === form.prefijo) ?? countries[0], [form.prefijo]);
   const selectedProcedures = selected.filter(Boolean);
   const numeroDoctor = "573175697927";
   const contactMsg = encodeURIComponent("Hola, me gustaría tener más información sobre las citas y procedimientos en la Clínica Renacer");
@@ -107,6 +100,7 @@ export default function HomePage() {
   const closeModal = () => {
     setIsModalOpen(false);
     setErrors({});
+    setSubmitError("");
   };
 
   useEffect(() => {
@@ -125,20 +119,87 @@ export default function HomePage() {
 
   useEffect(() => {
     let mounted = true;
+
     (async () => {
       try {
-        const res = await fetch(`${BACKEND}/procedimientos/activos`);
-        const data = res.ok ? await res.json() : fallbackProcedures;
+        const data = await apiFetch("/procedimientos/activos");
         const safe = Array.isArray(data) ? data : [];
-        if (mounted) setProceduresData(safe.length ? safe : fallbackProcedures);
-      } catch {
-        if (mounted) setProceduresData(fallbackProcedures);
+
+        if (mounted) {
+          setProceduresData(safe.length ? safe : fallbackProcedures);
+        }
+      } catch (error) {
+        console.error("Error cargando procedimientos:", error);
+        if (mounted) {
+          setProceduresData(fallbackProcedures);
+        }
       }
     })();
+
     return () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!form.fecha) {
+      setAvailableHours([]);
+      return;
+    }
+
+    const cargarHorarios = async () => {
+      try {
+        const data = await apiFetch(`/citas/horarios-disponibles?fecha=${form.fecha}`);
+        setAvailableHours(data.horarios ?? []);
+      } catch (error) {
+        console.error("Error cargando horarios:", error);
+        setAvailableHours([]);
+      }
+    };
+
+    cargarHorarios();
+  }, [form.fecha]);
+
+  useEffect(() => {
+    setForm((prev) => ({ ...prev, hora: "" }));
+  }, [form.fecha]);
+
+  const cargarCatalogos = async () => {
+    try {
+      const data = (await apiFetch("/catalogos")) as CatalogosResponse;
+      setCatalogos(data);
+
+      setForm((prev) => ({
+        ...prev,
+        tipoDocumento: prev.tipoDocumento || data.tipos_documento?.[0] || "",
+        prefijo: prev.prefijo || data.prefijos_telefonicos?.[0]?.dial || "",
+        sexo: prev.sexo || data.sexos?.[0] || "",
+      }));
+    } catch (error) {
+      console.error("Error cargando catálogos:", error);
+    }
+  };
+
+  useEffect(() => {
+    cargarCatalogos();
+  }, []);
+
+  function enumLabel(value: string) {
+    const base = value
+      .split("_")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+
+    const map: Record<string, string> = {
+      "Cedula Chilena": "Cédula chilena",
+      "Cedula Extranjero": "Cédula de extranjero",
+      "Pasaporte Chileno": "Pasaporte chileno",
+      "Pasaporte Extranjero": "Pasaporte extranjero",
+      "Documento Extranjero": "Documento extranjero",
+    };
+
+    return map[base] ?? base;
+  }
 
   const toggleProcedure = (name: string) => {
     if (selected.includes(name)) {
@@ -181,30 +242,77 @@ export default function HomePage() {
     if (!form.documento.trim()) next.documento = "El número de documento es obligatorio.";
     if (!form.prefijo.trim()) next.prefijo = "El prefijo es obligatorio.";
     if (!form.celular.trim()) next.celular = "El celular es obligatorio.";
+    if (!form.email.trim()) next.email = "El correo electrónico es obligatorio.";
+    if (!form.direccion.trim()) next.direccion = "La dirección es obligatoria.";
+    if (!form.sexo.trim()) next.sexo = "El sexo es obligatorio.";
     if (!form.fecha) next.fecha = "La fecha es obligatoria.";
     else if (new Date(`${form.fecha}T00:00:00`).getTime() < new Date(`${minDate}T00:00:00`).getTime()) next.fecha = "La fecha debe ser desde dos días después de hoy.";
+    if (!form.hora) next.hora = "La hora es obligatoria.";
     if (selected.length < 1) next.procedimiento1 = "Selecciona al menos un procedimiento.";
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitError("");
+
     if (!validateForm()) return;
+
+    const selectedProcedureIds = procedureList
+      .filter((p: any) => selected.includes(p.nombre ?? p.name ?? ""))
+      .map((p: any) => p.id);
+
+    const payload = {
+      nombre_completo: form.nombre,
+      tipo_identificacion: form.tipoDocumento,
+      identificacion: form.documento,
+      telefono: `+${form.prefijo}${form.celular}`,
+      email: form.email.trim(),
+      direccion: form.direccion.trim(),
+      sexo: form.sexo,
+      fecha_programada: form.fecha,
+      hora: form.hora,
+      procedimiento_ids: selectedProcedureIds,
+      nota: form.mensaje.trim() || null,
+      valor_consulta: "0.00",
+    };
 
     const procs = selected.join(" + ");
     const msg = [
       `Hola, soy ${form.nombre} y estoy interesad@ en agendar una cita en Clínica Renacer.`,
-      `Mis datos son: documento ${form.tipoDocumento} ${form.documento}, número celular +${form.prefijo} ${form.celular}, fecha ${form.fecha}.`,
+      `Mis datos son: documento ${form.tipoDocumento} ${form.documento}, número celular +${form.prefijo} ${form.celular}, fecha ${form.fecha}, hora ${form.hora}.`,
       `Me gustaría hacerme estos procedimientos: ${procs}.`,
       `Mensaje adicional: ${form.mensaje.trim() || "N/A"}.`,
     ].join("\n\n");
 
-    window.open(`https://wa.me/${numeroDoctor}?text=${encodeURIComponent(msg)}`, "_blank", "noopener,noreferrer");
-    setForm(initialForm);
-    setErrors({});
-    setSelected([]);
-    setIsModalOpen(false);
+    try {
+      setIsSubmitting(true);
+
+      await apiFetch("/citas/publica", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      window.open(
+        `https://wa.me/${numeroDoctor}?text=${encodeURIComponent(msg)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      setForm(initialForm);
+      setErrors({});
+      setSelected([]);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creando cita:", error);
+      setSubmitError("No se pudo registrar la solicitud. Revisa la disponibilidad e intenta de nuevo.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const procedureList = proceduresData ?? fallbackProcedures;
@@ -223,9 +331,6 @@ export default function HomePage() {
             <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#galeria">ANTES Y DESPUÉS</a>
             <a className="nav-link-ghost text-base md:text-lg uppercase tracking-[0.16em]" href="#contacto">CONTÁCTANOS</a>
           </nav>
-          <div className="hidden md:flex items-center justify-end gap-3 w-[320px] shrink-0">
-            <a href="/#admin" className="rounded-full bg-violet-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-violet-400">Panel admin</a>
-          </div>
         </div>
       </header>
 
@@ -423,10 +528,39 @@ export default function HomePage() {
 
                 <div>
                   <label htmlFor="tipoDocumento" className="mb-2 block text-sm font-medium text-slate-200">Tipo de documento *</label>
-                  <select id="tipoDocumento" name="tipoDocumento" value={form.tipoDocumento} onChange={handleInputChange} className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400">
-                    {documentTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  <select
+                    id="tipoDocumento"
+                    name="tipoDocumento"
+                    value={form.tipoDocumento}
+                    onChange={handleInputChange}
+                    className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                  >
+                    {(catalogos?.tipos_documento ?? []).map((value) => (
+                      <option key={value} value={value}>
+                        {enumLabel(value)}
+                      </option>
+                    ))}
                   </select>
                   {errors.tipoDocumento && <p className="mt-2 text-sm text-rose-300">{errors.tipoDocumento}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="sexo" className="mb-2 block text-sm font-medium text-slate-200">Sexo *</label>
+                  <select
+                    id="sexo"
+                    name="sexo"
+                    value={form.sexo}
+                    onChange={handleInputChange}
+                    className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                  >
+                    <option value="">Selecciona una opción</option>
+                    {(catalogos?.sexos ?? []).map((value) => (
+                      <option key={value} value={value}>
+                        {enumLabel(value)}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.sexo && <p className="mt-2 text-sm text-rose-300">{errors.sexo}</p>}
                 </div>
 
                 <div>
@@ -435,13 +569,58 @@ export default function HomePage() {
                   {errors.documento && <p className="mt-2 text-sm text-rose-300">{errors.documento}</p>}
                 </div>
 
+                <div>
+                  <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">Correo electrónico *</label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleInputChange}
+                    placeholder="correo@ejemplo.com"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 transition focus:border-cyan-400"
+                  />
+                  {errors.email && <p className="mt-2 text-sm text-rose-300">{errors.email}</p>}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="direccion" className="mb-2 block text-sm font-medium text-slate-200">Dirección *</label>
+                  <input
+                    id="direccion"
+                    name="direccion"
+                    value={form.direccion}
+                    onChange={handleInputChange}
+                    placeholder="Escribe tu dirección"
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 transition focus:border-cyan-400"
+                  />
+                  {errors.direccion && <p className="mt-2 text-sm text-rose-300">{errors.direccion}</p>}
+                </div>
+
                 <div className="md:col-span-2">
                   <label htmlFor="celular" className="mb-2 block text-sm font-medium text-slate-200">Celular *</label>
                   <div className="grid grid-cols-[120px_1fr] overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-                    <select id="prefijo" name="prefijo" value={form.prefijo} onChange={handleInputChange} className="border-r border-white/10 bg-[#111827] px-3 py-3 text-sm text-white outline-none">
-                      {countries.map((c) => <option key={c.code} value={c.dial}>{prefixLabel(c.dial, c.flag)}</option>)}
+                    <select
+                      id="prefijo"
+                      name="prefijo"
+                      value={form.prefijo}
+                      onChange={handleInputChange}
+                      className="border-r border-white/10 bg-[#111827] px-3 py-3 text-sm text-white outline-none"
+                    >
+                      {(catalogos?.prefijos_telefonicos ?? []).map((c) => (
+                        <option key={`${c.code}-${c.dial}`} value={c.dial}>
+                          {prefixLabel(c.dial, c.code, c.label)}
+                        </option>
+                      ))}
                     </select>
-                    <input id="celular" name="celular" value={form.celular} onChange={handleInputChange} inputMode="numeric" placeholder="Número" className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400" />
+                    <input
+                      id="celular"
+                      name="celular"
+                      value={form.celular}
+                      onChange={handleInputChange}
+                      inputMode="numeric"
+                      placeholder="Número"
+                      className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400"
+                    />
                   </div>
                   {errors.prefijo && <p className="mt-2 text-sm text-rose-300">{errors.prefijo}</p>}
                   {errors.celular && <p className="mt-2 text-sm text-rose-300">{errors.celular}</p>}
@@ -451,6 +630,25 @@ export default function HomePage() {
                   <label htmlFor="fecha" className="mb-2 block text-sm font-medium text-slate-200">Fecha *</label>
                   <input id="fecha" name="fecha" type="date" min={minDate} value={form.fecha} onChange={handleInputChange} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400" />
                   {errors.fecha && <p className="mt-2 text-sm text-rose-300">{errors.fecha}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="hora" className="mb-2 block text-sm font-medium text-slate-200">Hora *</label>
+                  <select
+                    id="hora"
+                    name="hora"
+                    value={form.hora}
+                    onChange={handleInputChange}
+                    className="w-full rounded-2xl border border-white/10 bg-[#111827] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                  >
+                    <option value="">Selecciona una hora</option>
+                    {availableHours.map((hour) => (
+                      <option key={hour} value={hour}>
+                        {hour}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.hora && <p className="mt-2 text-sm text-rose-300">{errors.hora}</p>}
                 </div>
 
                 <div className="md:col-span-2">
@@ -480,13 +678,27 @@ export default function HomePage() {
 
                 <div className="md:col-span-2">
                   <label htmlFor="mensaje" className="mb-2 block text-sm font-medium text-slate-200">Mensaje adicional</label>
-                  <textarea id="mensaje" name="mensaje" rows={4} value={form.mensaje} onChange={handleInputChange} placeholder="Cuéntanos qué deseas mejorar o cualquier detalle importante" className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 transition focus:border-cyan-400" />
+                  <textarea
+                    id="mensaje"
+                    name="mensaje"
+                    rows={4}
+                    value={form.mensaje}
+                    onChange={handleInputChange}
+                    placeholder="Cuéntanos qué deseas mejorar o cualquier detalle importante"
+                    className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 transition focus:border-cyan-400"
+                  />
                 </div>
               </div>
 
+              {submitError && <p className="mt-4 text-sm text-rose-300">{submitError}</p>}
+
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <button type="submit" className="btn-primary w-full">Enviar solicitud por WhatsApp</button>
-                <button type="button" onClick={closeModal} className="w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">Cancelar</button>
+                <button type="submit" disabled={isSubmitting} className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60">
+                  {isSubmitting ? "Enviando..." : "Enviar solicitud por WhatsApp"}
+                </button>
+                <button type="button" onClick={closeModal} className="w-full rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                  Cancelar
+                </button>
               </div>
             </form>
           </div>

@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.lifespan import lifespan
 from app.common.exceptions import ServiceError
 from app.db.database import Base, engine, ensure_schema_compatibility
 import app.models
@@ -11,10 +12,16 @@ from app.routes import (
     codigos_promocionales_router,
     pacientes_router,
     procedimientos_router,
+    enums_router,
 )
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Clinica Renacer API",
+    description="API para la gestión de la clínica Renacer",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 
 @app.exception_handler(ServiceError)
@@ -43,7 +50,7 @@ app.include_router(procedimientos_router)
 app.include_router(citas_router)
 app.include_router(codigos_promocionales_router)
 app.include_router(administradores_router)
-
+app.include_router(enums_router)
 
 # Enable CORS for local frontend during development
 origins = [
